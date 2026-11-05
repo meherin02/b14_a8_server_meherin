@@ -3,6 +3,7 @@ import cors from "cors";
 import { toNodeHandler } from "better-auth/node";
 import { connectDatabase } from "./lib/db.js";
 import { createAuth } from "./lib/auth.js";
+import { verifyAuthReadiness } from "./lib/authReadiness.js";
 import { createRequireAuth } from "./middleware/requireAuth.js";
 import { createHealthHandler } from "./routes/health.js";
 import {
@@ -14,6 +15,7 @@ import {
 async function start() {
   const { client, db } = await connectDatabase();
   const auth = createAuth(db, client);
+  await verifyAuthReadiness(auth);
   await prepareEventIndexes(db);
   const requireAuth = createRequireAuth(auth);
   const app = express();

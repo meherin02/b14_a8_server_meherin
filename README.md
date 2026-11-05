@@ -2,6 +2,8 @@
 
 Express, MongoDB, BetterAuth, JWT, event CRUD and event registrations.
 
+Before listening for requests, the server signs and verifies a short-lived diagnostic JWT using BetterAuth's server-only API. This catches incompatible auth secrets or signing keys during deployment instead of reporting healthy and failing logged-in requests later. The diagnostic token is discarded; no user or login session is created. Servers sharing this auth database must share the existing auth secret.
+
 The public `/api/health` endpoint performs a database ping with a three-second deadline. It returns HTTP 200 when the database responds, or HTTP 503 with a generic unavailable status on failure. Responses are not cached, and database error details are not exposed. Render uses this route for health checks.
 
 Registration and profile updates validate names (required, at most 100 characters) and HTTP(S) photo URLs (at most 2048 characters, no embedded credentials). Email signup requires both fields and a password of 6–128 characters containing uppercase and lowercase letters. Profile updates can change either field independently. Google OAuth remains handled by BetterAuth's provider flow.
