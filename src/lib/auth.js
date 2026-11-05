@@ -2,6 +2,10 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { createAuthMiddleware, APIError } from "better-auth/api";
 import { jwt } from "better-auth/plugins";
+import {
+  validateProfileFields,
+  validateSignupPassword,
+} from "../utils/authValidation.js";
 
 export function createAuth(db, client) {
   if (
@@ -34,30 +38,18 @@ export function createAuth(db, client) {
       : {},
     hooks: {
       before: createAuthMiddleware(async (ctx) => {
-        if (ctx.path !== "/sign-up/email") return;
-        const { password, name, image } = ctx.body || {};
-        if (
-          typeof password !== "string" ||
-          !/(?=.*[a-z])(?=.*[A-Z]).{6,}/.test(password)
-        ) {
-          throw new APIError("BAD_REQUEST", {
-            message:
-              "Use at least 6 characters with uppercase and lowercase letters.",
-          });
-        }
-        if (typeof name !== "string" || !name.trim()) {
-          throw new APIError("BAD_REQUEST", { message: "Enter your name." });
-        }
-        if (image) {
-          try {
-            if (!["https:", "http:"].includes(new URL(image).protocol))
-              throw new Error();
-          } catch {
-            throw new APIError("BAD_REQUEST", {
-              message: "Enter a valid photo URL.",
-            });
-          }
-        }
+        const signup = ctx.path === "/sign-up/email";
+        if (!signup && ctx.path !== "/update-user") return;
+        const error =
+          validateProfileFields(ctx.body, { required: signup }) ||
+          (signup ? validateSignupPassword(ctx.body?.password) : null);
+        if (error) throw new APIError("BAD_REQUEST", { message: error });
+        const fields = {};
+        if (typeof ctx.body.name === "string")
+          fields.name = ctx.body.name.trim();
+        if (typeof ctx.body.image === "string")
+          fields.image = ctx.body.image.trim();
+        return { context: { ...ctx, body: { ...ctx.body, ...fields } } };
       }),
     },
     plugins: [

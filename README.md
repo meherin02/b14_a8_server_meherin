@@ -2,6 +2,8 @@
 
 Express, MongoDB, BetterAuth, JWT, event CRUD and event registrations.
 
+Registration and profile updates validate names (required, at most 100 characters) and HTTP(S) photo URLs (at most 2048 characters, no embedded credentials). Email signup requires both fields and a password of 6–128 characters containing uppercase and lowercase letters. Profile updates can change either field independently. Google OAuth remains handled by BetterAuth's provider flow.
+
 `GET /api/registrations/events/:id/status` returns `{ "joined": true/false }` for the authenticated user. It requires the session and JWT, validates the event ID, and prevents caching the user-specific result. It does not expose another user's registration or personal data.
 
 Event endpoints now match the sibling client's API-CONTRACT.md. Public event browsing only returns future events, supports `.limit(6)`, and sorts by date. Protected event changes filter by the authenticated creator ID. Joining records the event and user, rejects duplicates with a unique index, and uses Atlas transactions to coordinate with deletion. Deleting an event also removes its registrations. Joined event lists read current event details and sort by date.
