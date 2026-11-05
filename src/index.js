@@ -4,6 +4,7 @@ import { toNodeHandler } from "better-auth/node";
 import { connectDatabase } from "./lib/db.js";
 import { createAuth } from "./lib/auth.js";
 import { createRequireAuth } from "./middleware/requireAuth.js";
+import { createHealthHandler } from "./routes/health.js";
 import {
   eventRoutes,
   registrationRoutes,
@@ -20,9 +21,7 @@ async function start() {
   // BetterAuth must receive the original request body before express.json().
   app.all("/api/auth/*splat", toNodeHandler(auth));
   app.use(express.json());
-  app.get("/api/health", (_req, res) =>
-    res.json({ status: "ok", database: "connected" }),
-  );
+  app.get("/api/health", createHealthHandler(db));
   app.get("/api/config", (_req, res) =>
     res.json({
       googleEnabled: Boolean(
@@ -40,14 +39,12 @@ async function start() {
     const status =
       error.status || (error.type === "entity.parse.failed" ? 400 : 500);
     if (status >= 500) console.error("API request failed:", error.name);
-    res
-      .status(status)
-      .json({
-        message:
-          status >= 500
-            ? "Something went wrong. Please try again."
-            : error.message,
-      });
+    res.status(status).json({
+      message:
+        status >= 500
+          ? "Something went wrong. Please try again."
+          : error.message,
+    });
   });
   const server = app.listen(process.env.PORT || 5000, () =>
     console.log("API ready at " + process.env.BETTER_AUTH_URL),

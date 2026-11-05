@@ -2,6 +2,8 @@
 
 Express, MongoDB, BetterAuth, JWT, event CRUD and event registrations.
 
+The public `/api/health` endpoint performs a database ping with a three-second deadline. It returns HTTP 200 when the database responds, or HTTP 503 with a generic unavailable status on failure. Responses are not cached, and database error details are not exposed. Render uses this route for health checks.
+
 Registration and profile updates validate names (required, at most 100 characters) and HTTP(S) photo URLs (at most 2048 characters, no embedded credentials). Email signup requires both fields and a password of 6–128 characters containing uppercase and lowercase letters. Profile updates can change either field independently. Google OAuth remains handled by BetterAuth's provider flow.
 
 `GET /api/registrations/events/:id/status` returns `{ "joined": true/false }` for the authenticated user. It requires the session and JWT, validates the event ID, and prevents caching the user-specific result. It does not expose another user's registration or personal data.
