@@ -16,7 +16,7 @@ services:
       - key: MONGODB_DB
         value: community_events
       - key: BETTER_AUTH_SECRET
-        generateValue: true
+        sync: false
       - key: MONGODB_URI
         sync: false
       - key: CLIENT_URL

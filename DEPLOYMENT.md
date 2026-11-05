@@ -15,7 +15,11 @@ This repository is the server repository. Its root already contains `package.jso
 | `GOOGLE_CLIENT_ID`     | The existing Google OAuth client ID                                                                 |
 | `GOOGLE_CLIENT_SECRET` | The existing private Google OAuth client secret                                                     |
 
-Render generates a separate `BETTER_AUTH_SECRET`. Do not upload `.env`. Render supplies `PORT`; leave that variable unset in the dashboard.
+Also supply `BETTER_AUTH_SECRET` from your existing local `.env` when reusing the same database. BetterAuth encrypts stored JWT private keys with this secret; generating a different secret for the same database can make authenticated session/token requests fail with HTTP 500. Keep this value identical across servers sharing that auth database. Never put it in this document or upload `.env`.
+
+For an already-created Render service, change `BETTER_AUTH_SECRET` in **Environment** manually and redeploy; Blueprint `sync: false` does not replace an existing value. Sign in again after changing it because existing live cookies were signed with the previous secret. Do not delete users, sessions, or JWT keys to resolve this mismatch.
+
+Render supplies `PORT`; leave that variable unset in the dashboard.
 
 5. Create the Blueprint. On the created service page, open **Connect → Outbound**, then add each listed CIDR range to the Atlas project's IP Access List. Wait for the entries to become Active. Render's outgoing addresses differ from your laptop's current IP address.
 6. If the first deployment failed while Atlas access was pending, retry **Manual Deploy → Deploy latest commit** after the entries become Active.
