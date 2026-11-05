@@ -81,6 +81,16 @@ export function eventRoutes(db, client, requireAuth) {
 export function registrationRoutes(db, client, requireAuth) {
   const router = Router();
   router.use(requireAuth);
+  router.get("/events/:id/status", async (req, res) => {
+    const registration = await db
+      .collection("registrations")
+      .findOne(
+        { eventId: eventId(req.params.id), userId: req.user.id },
+        { projection: { _id: 1 } },
+      );
+    res.set("Cache-Control", "private, no-store");
+    res.json({ joined: Boolean(registration) });
+  });
   router.get("/me", async (req, res) => {
     const events = await db
       .collection("registrations")
@@ -119,17 +129,15 @@ export function registrationRoutes(db, client, requireAuth) {
             404,
             "This event is unavailable or has already ended.",
           );
-        await db
-          .collection("registrations")
-          .insertOne(
-            {
-              eventId: id,
-              userId: req.user.id,
-              userEmail: req.user.email,
-              joinedAt: new Date(),
-            },
-            { session },
-          );
+        await db.collection("registrations").insertOne(
+          {
+            eventId: id,
+            userId: req.user.id,
+            userEmail: req.user.email,
+            joinedAt: new Date(),
+          },
+          { session },
+        );
       });
     } catch (error) {
       if (error.code === 11000)
