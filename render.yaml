@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: community-events-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "24.16.0"
+      - key: NODE_ENV
+        value: production
+      - key: DNS_SERVERS
+        value: "1.1.1.1,1.0.0.1"
+      - key: MONGODB_DB
+        value: community_events
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: MONGODB_URI
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: BETTER_AUTH_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
